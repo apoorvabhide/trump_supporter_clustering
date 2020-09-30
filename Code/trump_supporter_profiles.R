@@ -101,4 +101,4 @@ clusterideolog$ResponsesTotal <- ave(clusterideolog$Responses,clusterideolog$Clu
 clusterideolog$ResponsePC <- clusterideolog$Responses/clusterideolog$ResponsesTotal
 clusterideolog <- clusterideolog %>% dplyr::select(selfideology,ClusterAssigned,ResponsePC) %>% 
   dcast(selfideology~ClusterAssigned)
-table(cces_cluster1$,cces_cluster1$ClusterAssigned)
+table(cces_cluster1$policespending,cces_cluster1$ClusterAssigned)
