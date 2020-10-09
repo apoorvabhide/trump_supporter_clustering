@@ -48,9 +48,9 @@ cces <- cces_ts %>% select(caseid=caseid,
                            withdrawparis=CC18_332c,
                            withdrawtpp = CC18_332e,
                            selfideology=CC18_334A,
-                           trumpideology=CC18_334C,
-                           demideology=CC18_334D,
-                           repideology=CC18_334E,
+                           # trumpideology=CC18_334C,
+                           # demideology=CC18_334D,
+                           # repideology=CC18_334E,
                            russiacollusion=CC18_335,
                            epaco2=CC18_415a,
                            environprot = CC18_415d,
@@ -69,36 +69,54 @@ cces <- cces_ts %>% select(caseid=caseid,
                            transban=CC18_417_d,
                            trumpapprovepost=CC18_app_dtrmp_post,
                            womenunreasonablesexism=CC18_422c) %>% filter(!is.na(trumpapprove),!is.na(trumpapprovepost))
-cces <- cces %>% filter(trumpapprove %in% c(1,2))
+cces <- cces %>% filter(trumpapprove == 2)
 colSums(is.na(cces))
 cces <- cces %>% na.exclude()
-ggplot(cces,aes(x=trumpideology - repideology))+ geom_histogram(aes(y=..density..))
+# ggplot(cces,aes(x=trumpideology - repideology))+ geom_histogram(aes(y=..density..))
 # Create a df for clustering, selecting only a few columns
 cces_cluster <- cces %>% dplyr::select(-trumpapprove) %>%  #dplyr::select(caseid,selfideology,borderspendingpluswall,cutcorporatetax) %>% 
   mutate_all(as.character())
-rownames(cces_cluster) <- cces$caseid
+caseids <- cces$caseid
 cces_cluster$caseid <- NULL
 for(i in 1:ncol(cces_cluster))
 {
   cces_cluster[,i] <- as_factor(cces_cluster[,i])
 }
 
-# My system crashes if I try to create a gower dissimilarity matrix with 22k respondents.
-# Longer run solution: selecting fewer variables. Short-run solution: sampling 10k rows and working with it.
-seq <- 1:nrow(cces_cluster)
-set.seed(124)
-selectseq <- sample(x = seq,size = 10000,replace = T)
-cces_cluster1 <- cces_cluster[selectseq,]
+cces_cluster1 <- cces_cluster
 # creating distance matrix
 distmatrix <- daisy(x = cces_cluster1,metric = "gower")
 plot(hclust(distmatrix,method = "complete"))
 hc <- hclust(distmatrix,method="complete")
-cces_cluster1$caseid <- rownames(cces_cluster1)
-cces_cluster1$ClusterAssigned <- cutree(hc,k=7)
+cces_cluster1$caseid <- caseids
+cces_cluster1$ClusterAssigned <- cutree(hc,k=5)
 #Trying to profile these clusters created
 clusterideolog <- cces_cluster1 %>% group_by(ClusterAssigned,selfideology) %>% dplyr::summarise(Responses=length(unique(caseid)))
 clusterideolog$ResponsesTotal <- ave(clusterideolog$Responses,clusterideolog$ClusterAssigned,FUN=sum)
 clusterideolog$ResponsePC <- clusterideolog$Responses/clusterideolog$ResponsesTotal
 clusterideolog <- clusterideolog %>% dplyr::select(selfideology,ClusterAssigned,ResponsePC) %>% 
   dcast(selfideology~ClusterAssigned)
-table(cces_cluster1$policespending,cces_cluster1$ClusterAssigned)
+
+table(cces_cluster1$cuttaxesgt500k,cces_cluster1$ClusterAssigned)
+cluster_summary <- function(df,clusterNo)
+{
+  clust <- df %>% filter(ClusterAssigned == clusterNo)
+  
+}
+
+# CCES Profile variables
+cces_profile <- cces_ts %>% select(caseid=caseid,
+                           birthyr,
+                           gender,
+                           sexuality,
+                           educ,
+                           race,
+                           ideo5,
+                           pew_churatd,
+                           newsint,
+                           union,
+                           investor,
+                           tvuse=CC18_300_2 ,
+                           newspaper=CC18_300_3,
+                           radiouse=CC18_300_4)
+cces_cluster1 <- cces_cluster1 %>% mutate(caseid=as.numeric(caseid)) %>% left_join(cces_profile)
