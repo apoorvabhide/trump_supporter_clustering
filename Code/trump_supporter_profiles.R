@@ -54,6 +54,10 @@ cces <- cces_ts %>% select(caseid=caseid,
                            russiacollusion=CC18_335,
                            epaco2=CC18_415a,
                            environprot = CC18_415d,
+                           finchoiceact = CC18_416,
+                           repealcleanpower=CC18_417_a,
+                           withdrawirandeal=CC18_417_b,
+                           contactpublicoff = CC18_417a_5,
                            muslimban=CC18_417_c,
                            blackswithoutfavours=CC18_422e,
                            blacksgottenlessthandeserve=CC18_422g,
@@ -62,6 +66,8 @@ cces <- cces_ts %>% select(caseid=caseid,
                            racismrare = CC18_422b,
                            feministreasonable=CC18_422d,
                            welfarespend=CC18_426_1,
+                           healthcarespend=CC18_426_2,
+                           educationspend = CC18_426_3,
                            # pew_bornagain,
                            banassault=CC18_320c,
                            backgroundchecks=CC18_320a,
@@ -89,34 +95,73 @@ distmatrix <- daisy(x = cces_cluster1,metric = "gower")
 plot(hclust(distmatrix,method = "complete"))
 hc <- hclust(distmatrix,method="complete")
 cces_cluster1$caseid <- caseids
-cces_cluster1$ClusterAssigned <- cutree(hc,k=5)
+cces_cluster1$ClusterAssigned <- cutree(hc,k=4)
 #Trying to profile these clusters created
-clusterideolog <- cces_cluster1 %>% group_by(ClusterAssigned,selfideology) %>% dplyr::summarise(Responses=length(unique(caseid)))
-clusterideolog$ResponsesTotal <- ave(clusterideolog$Responses,clusterideolog$ClusterAssigned,FUN=sum)
-clusterideolog$ResponsePC <- clusterideolog$Responses/clusterideolog$ResponsesTotal
-clusterideolog <- clusterideolog %>% dplyr::select(selfideology,ClusterAssigned,ResponsePC) %>% 
-  dcast(selfideology~ClusterAssigned)
+# clusterideolog <- cces_cluster1 %>% group_by(ClusterAssigned,selfideology) %>% dplyr::summarise(Responses=length(unique(caseid)))
+# clusterideolog$ResponsesTotal <- ave(clusterideolog$Responses,clusterideolog$ClusterAssigned,FUN=sum)
+# clusterideolog$ResponsePC <- clusterideolog$Responses/clusterideolog$ResponsesTotal
+# clusterideolog <- clusterideolog %>% dplyr::select(selfideology,ClusterAssigned,ResponsePC) %>% 
+#   dcast(selfideology~ClusterAssigned)
 
-table(cces_cluster1$cuttaxesgt500k,cces_cluster1$ClusterAssigned)
-cluster_summary <- function(df,clusterNo)
-{
-  clust <- df %>% filter(ClusterAssigned == clusterNo)
-  
-}
+# table(cces_cluster1$cuttaxesgt500k,cces_cluster1$ClusterAssigned)
 
 # CCES Profile variables
 cces_profile <- cces_ts %>% select(caseid=caseid,
                            birthyr,
                            gender,
                            sexuality,
+                           region,
+                           edloan,
+                           employ,
                            educ,
                            race,
                            ideo5,
+                           numchildren,
                            pew_churatd,
+                           pew_bornagain,
+                           pew_prayer,
+                           internethome,
+                           internetwork,
+                           pid7,
+                           urbancity,
+                           nationaleconomy=CC18_301,
+                           faminc_new,
                            newsint,
+                           postedabtpolitics = CC18_300d_1,
+                           householdincomelastyear=CC18_302,
                            union,
                            investor,
                            tvuse=CC18_300_2 ,
                            newspaper=CC18_300_3,
-                           radiouse=CC18_300_4)
-cces_cluster1 <- cces_cluster1 %>% mutate(caseid=as.numeric(caseid)) %>% left_join(cces_profile)
+                           radiouse=CC18_300_4,
+                           voted2018midterm=CC18_401)
+for(i in 1:ncol(cces_profile))
+{
+  cces_profile[,i] <- as_factor(cces_profile[,i])
+}
+
+cces_cluster2 <- cces_cluster1 %>% mutate(caseid=as.numeric(caseid)) %>% left_join(cces_profile)
+
+cols <- colnames(cces_cluster2)
+cols <- cols[!cols %in% c("caseid","ClusterAssigned")]
+cluster_summary <- function(df,clusterNo)
+{
+  clust <- df %>% filter(ClusterAssigned == clusterNo)
+  responses <- data.frame(stringsAsFactors = F)
+  for(col in cols)
+  {
+    t <- data.frame(table(clust[col]),stringsAsFactors = F) %>% mutate(FreqPC = Freq/sum(Freq),
+                                                                       Question = col)
+    responses <- rbind(responses,t)
+  }
+  return(responses)
+}
+
+clust1 <- cluster_summary(cces_cluster2,clusterNo = 1) %>% rename(C1Freq=Freq,C1FreqPC=FreqPC)
+clust2 <- cluster_summary(cces_cluster2,clusterNo = 2) %>% rename(C2Freq=Freq,C2FreqPC=FreqPC)
+clust3 <- cluster_summary(cces_cluster2,clusterNo = 3) %>% rename(C3Freq=Freq,C3FreqPC=FreqPC)
+clust4 <- cluster_summary(cces_cluster2,clusterNo = 4) %>% rename(C4Freq=Freq,C4FreqPC=FreqPC)
+cces_cluster1 %>% group_by(ClusterAssigned) %>% dplyr::summarise(Responses = length(unique(caseid))) %>% 
+  mutate(ResponsesPC=Responses/sum(Responses))
+
+clusters <- clust1 %>% full_join(clust2) %>% full_join(clust3) %>% full_join(clust4)
