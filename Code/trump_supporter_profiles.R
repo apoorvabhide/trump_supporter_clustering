@@ -5,6 +5,7 @@ library(dplyr)
 library(ggplot2)
 library(cluster)
 library(reshape2)
+library(mclust)
 setwd("~/Documents/Writing/Trump Supporter/")
 # Load the data and choose required columns
 cces_ts <- readRDS("Data/cces_2018_data.RDS")
@@ -92,19 +93,13 @@ for(i in 1:ncol(cces_cluster))
 cces_cluster1 <- cces_cluster
 # creating distance matrix
 distmatrix <- daisy(x = cces_cluster1,metric = "gower")
+set.seed(423)
 plot(hclust(distmatrix,method = "complete"))
 hc <- hclust(distmatrix,method="complete")
 cces_cluster1$caseid <- caseids
 cces_cluster1$ClusterAssigned <- cutree(hc,k=4)
-#Trying to profile these clusters created
-# clusterideolog <- cces_cluster1 %>% group_by(ClusterAssigned,selfideology) %>% dplyr::summarise(Responses=length(unique(caseid)))
-# clusterideolog$ResponsesTotal <- ave(clusterideolog$Responses,clusterideolog$ClusterAssigned,FUN=sum)
-# clusterideolog$ResponsePC <- clusterideolog$Responses/clusterideolog$ResponsesTotal
-# clusterideolog <- clusterideolog %>% dplyr::select(selfideology,ClusterAssigned,ResponsePC) %>% 
-#   dcast(selfideology~ClusterAssigned)
-
-# table(cces_cluster1$cuttaxesgt500k,cces_cluster1$ClusterAssigned)
-
+cces_cluster1 %>% group_by(ClusterAssigned) %>% dplyr::summarise(Responses = length(unique(caseid))) %>% 
+  mutate(ResponsesPC=Responses/sum(Responses))
 # CCES Profile variables
 cces_profile <- cces_ts %>% select(caseid=caseid,
                            birthyr,
@@ -157,11 +152,26 @@ cluster_summary <- function(df,clusterNo)
   return(responses)
 }
 
+caseids <- cces_cluster2$caseid
+distmatrix <- daisy(x = cces_cluster2[,-45],metric = "gower")
+set.seed(423)
+plot(hclust(distmatrix,method = "complete"))
+hc <- hclust(distmatrix,method="complete")
+cces_cluster2$caseid <- caseids
+cces_cluster2$ClusterAssigned <- cutree(hc,k=3)
+cces_cluster2 %>% group_by(ClusterAssigned) %>% dplyr::summarise(Responses = length(unique(caseid))) %>% 
+  mutate(ResponsesPC=Responses/sum(Responses))
+
 clust1 <- cluster_summary(cces_cluster2,clusterNo = 1) %>% rename(C1Freq=Freq,C1FreqPC=FreqPC)
 clust2 <- cluster_summary(cces_cluster2,clusterNo = 2) %>% rename(C2Freq=Freq,C2FreqPC=FreqPC)
 clust3 <- cluster_summary(cces_cluster2,clusterNo = 3) %>% rename(C3Freq=Freq,C3FreqPC=FreqPC)
 clust4 <- cluster_summary(cces_cluster2,clusterNo = 4) %>% rename(C4Freq=Freq,C4FreqPC=FreqPC)
-cces_cluster1 %>% group_by(ClusterAssigned) %>% dplyr::summarise(Responses = length(unique(caseid))) %>% 
-  mutate(ResponsesPC=Responses/sum(Responses))
 
-clusters <- clust1 %>% full_join(clust2) %>% full_join(clust3) %>% full_join(clust4)
+clusters <- clust1 %>% full_join(clust2) %>% full_join(clust3)# %>% full_join(clust4)
+
+# analysing & visualising the entire base first
+c1 <- ggplot(cces_cluster2 %>% filter(ClusterAssigned==1),aes(x=faminc_new)) + geom_histogram(stat="count")
+c2 <- ggplot(cces_cluster2 %>% filter(ClusterAssigned==2),aes(x=faminc_new)) + geom_histogram(stat="count")
+c3 <- ggplot(cces_cluster2 %>% filter(ClusterAssigned==3),aes(x=faminc_new)) + geom_histogram(stat="count")
+# c4 <- ggplot(cces_cluster2 %>% filter(ClusterAssigned==4),aes(x=faminc_new)) + geom_histogram(stat="count")
+gridExtra::grid.arrange(c1,c2,c3,c4,ncol=1)
