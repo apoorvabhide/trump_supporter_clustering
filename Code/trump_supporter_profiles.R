@@ -134,12 +134,136 @@ cluster_summary <- function(df,clusterNo)
   return(responses)
 }
 
-clust1 <- cluster_summary(cces_cluster2,clusterNo = 1) %>% rename(C1Freq=Freq,C1FreqPC=FreqPC)
-clust2 <- cluster_summary(cces_cluster2,clusterNo = 2) %>% rename(C2Freq=Freq,C2FreqPC=FreqPC)
-clust3 <- cluster_summary(cces_cluster2,clusterNo = 3) %>% rename(C3Freq=Freq,C3FreqPC=FreqPC)
-clust4 <- cluster_summary(cces_cluster2,clusterNo = 4) %>% rename(C4Freq=Freq,C4FreqPC=FreqPC)
+clust1 <- cluster_summary(cces_cluster2,clusterNo = 1) %>% rename(C1Freq=Freq,TrueBelievers=FreqPC)
+clust2 <- cluster_summary(cces_cluster2,clusterNo = 2) %>% rename(C2Freq=Freq,Conservatives=FreqPC)
+clust3 <- cluster_summary(cces_cluster2,clusterNo = 3) %>% rename(C3Freq=Freq,SocialConservMod=FreqPC)
+clust4 <- cluster_summary(cces_cluster2,clusterNo = 4) %>% rename(C4Freq=Freq,LowPartisanMod=FreqPC)
 
 clusters <- clust1 %>% full_join(clust2) %>% full_join(clust3) %>% full_join(clust4)
+
+#Function to visualise particular question
+clustviz <- function(cluster_summary_df,question)
+{
+  clust <- cluster_summary_df %>% filter(Question == question)
+  
+}
+
+# Self-reported ideology
+clust <- clusters %>% filter(Question == "selfideology") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                           LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+library(showtext)
+ggplot(clust,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Very Liberal" = "#2196f3","Liberal"="#a1a3e9","Somewhat Liberal"="#d0b9df",
+                               "Middle of the Road" = "#e1d7de","Somewhat Conservative" = "#f1a8c3","Conservative"="#fe7589",
+                               "Very Conservative" = "#f44336","Not sure" = "#788385","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Ideology")+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                            breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+# Did he collude with Russia?
+clustcoll <- clusters %>% filter(Question == "russiacollusion") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                              LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustcoll,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Yes" = "#2196f3",
+                               "Not sure" = "dark grey","No" = "#f44336","skipped"="#e1d7de",
+                               "not asked" = "steelblue"),
+                    name = "Opinion on \nCollusion")+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                            breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+# News interest
+clustnews <- clusters %>% filter(Question == "newsint") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                                  LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustnews,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Most of the time" = "#003366","Some of the time"="#006299","Only now and then"="#0094c5",
+                               "Hardly at all"="#00c9e8","DK"="#00ffff","skipped"="dark grey",
+                               "not asked" = "steelblue"),name = "Political Interest")+
+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                     breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+# Cut taxes on income brackets > $500k.
+clusttaxrich <- clusters %>% filter(Question == "cuttaxesgt500k") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                             LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clusttaxrich,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Oppose" = "#2196f3","Support" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Cut Taxes \non >$500k")+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                          breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+# Cut corporate taxes
+clusttaxcorp <- clusters %>% filter(Question == "cutcorporatetax") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                                    LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clusttaxcorp,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Oppose" = "#2196f3","Support" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Cut Corporate \nIncome Tax")+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                         breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+# Medicare for all
+clustmedicareforall <- clusters %>% filter(Question == "medicareforall") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                                     LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustmedicareforall,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Oppose" = "#f44336","Support" = "#2196f3","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Medicare \nFor All")+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                              breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+# Repeal Obamacare
+clustobamacare <- clusters %>% filter(Question == "repealobamacare") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                                           LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustobamacare,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Oppose" = "#2196f3","Support" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Repeal \nObamacare")+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                      breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
 
 # analysing & visualising the entire base first
 c1 <- ggplot(cces_cluster2 %>% filter(ClusterAssigned==1),aes(x=birthyr)) + geom_histogram(stat="count")+xlim(1920,2000)
