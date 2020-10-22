@@ -141,12 +141,6 @@ clust4 <- cluster_summary(cces_cluster2,clusterNo = 4) %>% rename(C4Freq=Freq,Lo
 
 clusters <- clust1 %>% full_join(clust2) %>% full_join(clust3) %>% full_join(clust4)
 
-#Function to visualise particular question
-clustviz <- function(cluster_summary_df,question)
-{
-  clust <- cluster_summary_df %>% filter(Question == question)
-  
-}
 
 # Self-reported ideology
 clust <- clusters %>% filter(Question == "selfideology") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
@@ -157,7 +151,7 @@ ggplot(clust,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=
   scale_fill_manual(values = c("Very Liberal" = "#2196f3","Liberal"="#a1a3e9","Somewhat Liberal"="#d0b9df",
                                "Middle of the Road" = "#e1d7de","Somewhat Conservative" = "#f1a8c3","Conservative"="#fe7589",
                                "Very Conservative" = "#f44336","Not sure" = "#788385","skipped"="dark grey",
-                               "not asked" = "steelblue"),
+                               "not asked" = "medium grey"),
                     name = "Ideology")+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
                                                             breaks = seq(0,1,0.1))+
   theme(panel.background = element_rect(fill = "white"),
@@ -264,6 +258,160 @@ ggplot(clustobamacare,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_c
         panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
                                         colour = "#c1c3c4"))
 
+# Withdrawal from Paris
+clustparis <- clusters %>% filter(Question == "withdrawparis") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                                       LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustparis,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Oppose" = "#2196f3","Support" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Withdraw from \nParis Agreement")+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                      breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+#Strengthen EPA enforcement
+clustepa <- clusters %>% filter(Question == "environprot") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                                 LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustepa,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Support" = "#2196f3","Oppose" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Strengthen EPA \nEnforcement")+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                                   breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+# Withdrawal from TPP
+clusttpp <- clusters %>% filter(Question == "withdrawtpp") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                             LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clusttpp,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Oppose" = "#2196f3","Support" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Withdraw \nfrom TPP")+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                       breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+# Border Wall
+clustwall <- clusters %>% filter(Question == "borderspendingpluswall") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                             LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustwall,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Oppose" = "#2196f3","Support" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Increase Border \nSpending & Build Wall")+  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                       breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+# Reduce Legal immigration
+clustlegal <- clusters %>% filter(Question == "reducelegalimmigration") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                                         LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustlegal,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Oppose" = "#2196f3","Support" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Reduce Legal \nImmigration") +  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                                           breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+# Blacks should work hard without favours.
+clustblackfavour <- clusters %>% filter(Question == "blackswithoutfavours") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                                          LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustblackfavour,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Strongly disagree" = "#2196f3","Somewhat disagree"="#9CBBEC",
+                               "Neither agree  nor disagree" = "#e2e2e2","Somewhat agree" = "#F89A89",
+                               "Strongly  agree" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Blacks should work \nwithout favours") +  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                               breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+# Blacks should just work harder.
+clustblackworkharder <- clusters %>% filter(Question == "blackstryharder") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                                              LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustblackworkharder,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Strongly disagree" = "#2196f3","Somewhat disagree"="#9CBBEC",
+                               "Neither agree  nor disagree" = "#e2e2e2","Somewhat agree" = "#F89A89",
+                               "Strongly  agree" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Blacks should work \nwithout favours") +  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                                         breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+# Blacks should just work harder.
+clustblackstryharder <- clusters %>% filter(Question == "blackstryharder") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                                             LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustblackstryharder,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Strongly disagree" = "#2196f3","Somewhat disagree"="#9CBBEC",
+                               "Neither agree  nor disagree" = "#e2e2e2","Somewhat agree" = "#F89A89",
+                               "Strongly  agree" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Blacks should \njust try harder") +  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                                         breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+
+# Throw re-entry immigrants into prison
+clustreentry <- clusters %>% filter(Question == "reentryprison") %>% dplyr::select(Var1,TrueBelievers,Conservatives,SocialConservMod,
+                                                                                          LowPartisanMod) %>% 
+  rename(Answer = Var1) %>% melt(id.vars="Answer") %>% rename(Cluster=variable)
+ggplot(clustreentry,aes(x=Cluster,y=value, fill = as.factor(Answer))) + geom_col(width=0.5) + coord_flip()+
+  scale_fill_manual(values = c("Oppose" = "#2196f3","Support" = "#f44336","skipped"="dark grey",
+                               "not asked" = "steelblue"),
+                    name = "Jail for \ndeport re-entry") +  scale_y_continuous(labels = scales::percent_format(accuracy=1),
+                                                                               breaks = seq(0,1,0.1))+
+  theme(panel.background = element_rect(fill = "white"),
+        axis.line = element_line(colour = "#c1c3c4"),
+        text=element_text(family="Montserrat"),
+        axis.text = element_text(family="Montserrat"),
+        panel.grid.major = element_line(size = 0.5, linetype = 'dotted',
+                                        colour = "#c1c3c4"))
+
+##### More hacky code ######
+########################################################################################################################
+########################################################################################################################
 
 # analysing & visualising the entire base first
 c1 <- ggplot(cces_cluster2 %>% filter(ClusterAssigned==1),aes(x=birthyr)) + geom_histogram(stat="count")+xlim(1920,2000)
